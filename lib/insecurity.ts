@@ -51,7 +51,12 @@ export const cutOffPoisonNullByte = (str: string) => {
   return str
 }
 
+const voidMiddleware = function (req: any, res: any, next: any) {
+  next()
+}
+
 export const isAuthorized = () => expressJwt(({ secret: publicKey }) as any)
+// export const isAuthorized = () => voidMiddleware
 export const denyAll = () => expressJwt({ secret: '' + Math.random() } as any)
 export const authorize = (user = {}) => jwt.sign(user, privateKey, { expiresIn: '6h', algorithm: 'RS256' })
 export const verify = (token: string) => token ? (jws.verify as ((token: string, secret: string) => boolean))(token, publicKey) : false
@@ -160,6 +165,7 @@ export const deluxeToken = (email: string) => {
 }
 
 export const isAccounting = () => {
+  // return voidMiddleware
   return (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = verify(utils.jwtFrom(req)) && decode(utils.jwtFrom(req))
     if (decodedToken?.data?.role === roles.accounting) {
@@ -171,11 +177,13 @@ export const isAccounting = () => {
 }
 
 export const isDeluxe = (req: Request) => {
+  // return voidMiddleware
   const decodedToken = verify(utils.jwtFrom(req)) && decode(utils.jwtFrom(req))
   return decodedToken?.data?.role === roles.deluxe && decodedToken?.data?.deluxeToken && decodedToken?.data?.deluxeToken === deluxeToken(decodedToken?.data?.email)
 }
 
 export const isCustomer = (req: Request) => {
+  // return voidMiddleware
   const decodedToken = verify(utils.jwtFrom(req)) && decode(utils.jwtFrom(req))
   return decodedToken?.data?.role === roles.customer
 }
